@@ -494,6 +494,64 @@ class ONVIFDevice:
             else:
                 LOGGER.error("Error trying to perform PTZ action: %s", err)
 
+    async def async_perform_ptz_get_presets(
+        self,
+        profile: Profile,
+    ) -> dict:
+        """Get all presets from the camera."""
+        ptz_service = await self.device.create_ptz_service()
+
+        LOGGER.debug("Calling GetPresets")
+        try:
+            if not profile.ptz:
+                LOGGER.warning("GetPresets not supported on device '%s'", self.name)
+                return {"presets": []}
+
+            req = ptz_service.create_type("GetPresets")
+            req.ProfileToken = profile.token
+
+            presets = await ptz_service.GetPresets(req)
+            result = []
+            for preset in presets:
+                token = preset.token if hasattr(preset, "token") else str(preset._token)
+                name = preset.Name if hasattr(preset, "Name") else None
+                result.append({"token": token, "name": name})
+                LOGGER.info("Preset: token=%s name=%s", token, name)
+
+            return {"presets": result}
+        except ONVIFError as err:
+            if "Bad Request" in err.reason:
+                LOGGER.warning("Device '%s' doesn't support PTZ", self.name)
+            else:
+                LOGGER.error("Error trying to perform PTZ action: %s", err)
+            return {"presets": []}
+
+    async def async_perform_ptz_remove_preset(
+        self,
+        profile: Profile,
+        preset: str,
+    ):
+        """Perform a RemovePreset PTZ action on the camera."""
+        ptz_service = await self.device.create_ptz_service()
+
+        LOGGER.debug("Calling RemovePreset preset=%s", preset)
+        try:
+            if not profile.ptz:
+                LOGGER.warning("RemovePreset not supported on device '%s'", self.name)
+                return
+
+            req = ptz_service.create_type("RemovePreset")
+            req.ProfileToken = profile.token
+            req.PresetToken = _normalize_preset_token(preset)
+
+            LOGGER.debug("Making RemovePreset request %s", req)
+            await ptz_service.RemovePreset(req)
+        except ONVIFError as err:
+            if "Bad Request" in err.reason:
+                LOGGER.warning("Device '%s' doesn't support PTZ", self.name)
+            else:
+                LOGGER.error("Error trying to perform PTZ action: %s", err)
+
     async def async_perform_ptz_goto_preset(
         self, profile: Profile, preset: str, speed=None
     ):

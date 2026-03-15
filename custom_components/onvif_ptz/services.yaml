@@ -158,6 +158,25 @@ ptz_set_preset:
       selector:
         text:
 
+ptz_remove_preset:
+  name: PTZ (RemovePreset)
+  description: >
+    Remove an existing preset from the camera. You can then re-create it with
+    SetPreset to update its position. Camera devices may have multiple PTZ
+    nodes, you usually want to select a single entity rather than a device.
+  target:
+    entity:
+      integration: onvif_ptz
+      domain: button
+    device:
+      integration: onvif_ptz
+  fields:
+    preset:
+      name: Preset Token
+      description: The preset token to remove (e.g. "1" or "PresetToken_1")
+      selector:
+        text:
+
 ptz_goto_preset:
   name: PTZ (GotoPreset)
   description: >
@@ -181,3 +200,17 @@ ptz_goto_preset:
       description: Which preset to go to (often, a number)
       selector:
         text:
+
+ptz_get_presets:
+  name: PTZ (GetPresets)
+  description: >
+    Get a list of all saved presets from the camera, including their token and
+    name. Returns response data with the preset list. Camera devices may have
+    multiple PTZ nodes, you usually want to select a single entity rather than
+    a device.
+  target:
+    entity:
+      integration: onvif_ptz
+      domain: button
+    device:
+      integration: onvif_ptz

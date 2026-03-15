@@ -3,7 +3,7 @@
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, SupportsResponse
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import entity_platform, config_validation as cv
 from homeassistant.components.button import ButtonEntity
@@ -24,7 +24,9 @@ from .const import (
     SERVICE_CONTINUOUS_MOVE_PTZ,
     SERVICE_STOP_PTZ,
     SERVICE_GOTO_HOME_POSITION,
+    SERVICE_GET_PRESETS,
     SERVICE_GOTO_PRESET,
+    SERVICE_REMOVE_PRESET,
     SERVICE_SET_HOME_POSITION,
     SERVICE_SET_PRESET,
     DOMAIN,
@@ -108,12 +110,25 @@ async def async_setup_entry(
         "async_perform_ptz_set_preset",
     )
     platform.async_register_entity_service(
+        SERVICE_REMOVE_PRESET,
+        {
+            vol.Required(ATTR_PRESET): cv.string,
+        },
+        "async_perform_ptz_remove_preset",
+    )
+    platform.async_register_entity_service(
         SERVICE_GOTO_PRESET,
         {
             vol.Required(ATTR_PRESET): cv.string,
             vol.Optional(ATTR_SPEED): PTZ_SCHEMA,
         },
         "async_perform_ptz_goto_preset",
+    )
+    platform.async_register_entity_service(
+        SERVICE_GET_PRESETS,
+        {},
+        "async_perform_ptz_get_presets",
+        supports_response=SupportsResponse.ONLY,
     )
 
     device = hass.data[DOMAIN][config_entry.unique_id]
@@ -183,6 +198,16 @@ class ONVIFCameraPTZEntity(ONVIFBaseEntity, ButtonEntity):
         await self.device.async_perform_ptz_set_preset(
             self.profile, preset=preset, name=name
         )
+
+    async def async_perform_ptz_remove_preset(self, preset) -> None:
+        """Perform a RemovePreset PTZ action on the camera."""
+        await self.device.async_perform_ptz_remove_preset(
+            self.profile, preset=preset
+        )
+
+    async def async_perform_ptz_get_presets(self) -> dict:
+        """Get all presets from the camera."""
+        return await self.device.async_perform_ptz_get_presets(self.profile)
 
     async def async_perform_ptz_goto_preset(self, preset, speed=None) -> None:
         """Perform a GotoPreset PTZ action on the camera."""

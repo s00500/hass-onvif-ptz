@@ -24,8 +24,10 @@ ptz_continuous | ONVIF ContinuousMove command, moves the camera at a specified v
 ptz_stop | Stops camera movement
 ptz_set_home_position | Sets the home position
 ptz_goto_home_position | Goes to the home position
-ptz_set_preset | Sets a preset
-ptz_goto_preset | Goes to a preset
+ptz_set_preset | Saves the current camera position as a preset (creates new if no token provided, updates existing if token provided)
+ptz_get_presets | Returns a list of all saved presets with their tokens and names (response service)
+ptz_goto_preset | Moves the camera to a saved preset position
+ptz_remove_preset | Deletes a saved preset from the camera
 
 ## Installation
 
@@ -38,6 +40,45 @@ ptz_goto_preset | Goes to a preset
 1. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "ONVIF PTZ"
 
 ## Configuration is done in the UI
+
+## Lovelace Preset Card
+
+This integration includes a bundled Lovelace card for managing PTZ presets with a visual UI.
+
+### Card Setup
+
+1. Go to **Settings -> Dashboards -> Resources**
+2. Add a new resource with URL: `/onvif_ptz/onvif-ptz-preset-card.js` and type **JavaScript Module**
+3. Add the card to a dashboard — it will appear in the card picker as **ONVIF PTZ Presets**
+
+### Card Configuration
+
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `entity` | Yes | — | A `button` entity from this integration (e.g. `button.camera_main_ptz_controls`) |
+| `title` | No | `PTZ Presets` | Card header text |
+
+Example YAML:
+
+```yaml
+type: custom:onvif-ptz-preset-card
+entity: button.camera_main_ptz_controls
+title: Camera Presets
+```
+
+### Normal Mode
+
+Displays a grid of preset buttons. Tap a preset to move the camera to that position. Use the refresh button to reload presets from the camera and the pencil icon to enter edit mode.
+
+### Edit Mode
+
+Each preset shows a row with:
+
+- **Rename** — Enter a new name and click Rename. The card moves the camera to the preset position first (since ONVIF `SetPreset` always saves the current position), waits for it to arrive, then saves with the new name.
+- **Save Pos** — Overwrites the preset's saved position with where the camera is currently pointed.
+- **Delete** — Removes the preset after confirmation.
+
+At the bottom, an **Add** row lets you create a new preset at the camera's current position with an optional name.
 
 <!---->
 

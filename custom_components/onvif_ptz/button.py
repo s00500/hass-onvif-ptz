@@ -102,7 +102,7 @@ async def async_setup_entry(
     platform.async_register_entity_service(
         SERVICE_SET_PRESET,
         {
-            vol.Required(ATTR_PRESET): cv.string,
+            vol.Optional(ATTR_PRESET): cv.string,
             vol.Optional(ATTR_NAME): cv.string,
         },
         "async_perform_ptz_set_preset",
@@ -178,7 +178,7 @@ class ONVIFCameraPTZEntity(ONVIFBaseEntity, ButtonEntity):
             self.profile, speed=speed
         )
 
-    async def async_perform_ptz_set_preset(self, preset, name=None) -> None:
+    async def async_perform_ptz_set_preset(self, preset=None, name=None) -> None:
         """Perform a SetPreset PTZ action on the camera."""
         await self.device.async_perform_ptz_set_preset(
             self.profile, preset=preset, name=name

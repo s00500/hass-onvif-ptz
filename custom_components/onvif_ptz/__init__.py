@@ -52,7 +52,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
 
-    hass.data[DOMAIN][entry.unique_id]
+    device = hass.data[DOMAIN].pop(entry.unique_id)
+    await device.async_stop()
     platforms = [Platform.BUTTON]
 
     return await hass.config_entries.async_unload_platforms(entry, platforms)

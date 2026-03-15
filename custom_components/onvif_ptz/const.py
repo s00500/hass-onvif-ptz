@@ -5,8 +5,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME = "ONVIF PTZ"
 DOMAIN = "onvif_ptz"
-VERSION = "0.0.0"
-ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
+VERSION = "0.4.0"
 
 DEFAULT_PORT = 80
 

@@ -94,7 +94,7 @@ ptz_stop:
       description: Stop pan/tilt
       selector:
         boolean:
-    speed:
+    zoom:
       name: Stop Zoom
       description: Stop zoom
       selector:
@@ -135,9 +135,11 @@ ptz_goto_home_position:
 ptz_set_preset:
   name: PTZ (SetPreset)
   description: >
-    Set the specified preset for the camera. Not all cameras which support PTZ
-    support setting the home position. Camera devices may have multiple PTZ
-    nodes, you usually want to select a single entity rather than a device.
+    Save the camera's current position as a preset. If preset token is omitted,
+    the camera creates a new preset and returns its token. If preset token is
+    provided, the existing preset is updated with the current position. Camera
+    devices may have multiple PTZ nodes, you usually want to select a single
+    entity rather than a device.
   target:
     entity:
       integration: onvif_ptz
@@ -146,13 +148,13 @@ ptz_set_preset:
       integration: onvif_ptz
   fields:
     preset:
-      name: Preset
-      description: Which preset to set (often, a number)
+      name: Preset Token
+      description: The preset token to update (optional; omit to create a new preset)
       selector:
         text:
     name:
-      name: Name
-      description: The name for the preset (optional)
+      name: Preset Name
+      description: A human-readable name for the preset (optional)
       selector:
         text:
 

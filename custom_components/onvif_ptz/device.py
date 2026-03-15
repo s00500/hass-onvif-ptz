@@ -429,8 +429,10 @@ class ONVIFDevice:
                 )
                 return
 
-            LOGGER.debug("Making SetHomePosition request %s", profile.token)
-            await ptz_service.SetHomePosition(profile.token)
+            req = ptz_service.create_type("SetHomePosition")
+            req.ProfileToken = profile.token
+            LOGGER.debug("Making SetHomePosition request %s", req)
+            await ptz_service.SetHomePosition(req)
         except ONVIFError as err:
             if "Bad Request" in err.reason:
                 LOGGER.warning("Device '%s' doesn't support PTZ", self.name)
@@ -464,7 +466,7 @@ class ONVIFDevice:
     async def async_perform_ptz_set_preset(
         self,
         profile: Profile,
-        preset: str,
+        preset: Optional[str] = None,
         name: Optional[str] = None,
     ):
         """Perform a SetPreset PTZ action on the camera."""
@@ -478,11 +480,14 @@ class ONVIFDevice:
 
             req = ptz_service.create_type("SetPreset")
             req.ProfileToken = profile.token
-            req.PresetToken = preset
-            req.PresetName = name
+            if preset is not None:
+                req.PresetToken = preset
+            if name is not None:
+                req.PresetName = name
 
             LOGGER.debug("Making SetPreset request %s", req)
-            await ptz_service.SetPreset(req)
+            response = await ptz_service.SetPreset(req)
+            LOGGER.info("SetPreset response (PresetToken): %s", response)
         except ONVIFError as err:
             if "Bad Request" in err.reason:
                 LOGGER.warning("Device '%s' doesn't support PTZ", self.name)
@@ -495,10 +500,10 @@ class ONVIFDevice:
         """Perform a GotoPreset PTZ action on the camera."""
         ptz_service = await self.device.create_ptz_service()
 
-        LOGGER.debug("Calling SetPreset preset=%s speed=%s", preset, speed)
+        LOGGER.debug("Calling GotoPreset preset=%s speed=%s", preset, speed)
         try:
             if not profile.ptz:
-                LOGGER.warning("GotoPrest not supported on device '%s'", self.name)
+                LOGGER.warning("GotoPreset not supported on device '%s'", self.name)
                 return
 
             req = ptz_service.create_type("GotoPreset")

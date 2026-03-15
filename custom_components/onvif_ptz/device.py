@@ -481,7 +481,7 @@ class ONVIFDevice:
             req = ptz_service.create_type("SetPreset")
             req.ProfileToken = profile.token
             if preset is not None:
-                req.PresetToken = preset
+                req.PresetToken = _normalize_preset_token(preset)
             if name is not None:
                 req.PresetName = name
 
@@ -508,7 +508,7 @@ class ONVIFDevice:
 
             req = ptz_service.create_type("GotoPreset")
             req.ProfileToken = profile.token
-            req.PresetToken = preset
+            req.PresetToken = _normalize_preset_token(preset)
             req.Speed = speed
 
             LOGGER.debug("Making GotoPreset request %s", req)
@@ -518,6 +518,13 @@ class ONVIFDevice:
                 LOGGER.warning("Device '%s' doesn't support PTZ", self.name)
             else:
                 LOGGER.error("Error trying to perform PTZ action: %s", err)
+
+
+def _normalize_preset_token(token: str) -> str:
+    """Add 'PresetToken_' prefix if the token is a plain number."""
+    if token.isdigit():
+        return f"PresetToken_{token}"
+    return token
 
 
 def get_device(host, port, username, password) -> ONVIFCamera:

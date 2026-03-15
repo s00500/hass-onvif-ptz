@@ -7,6 +7,7 @@ For more details about this integration, please refer to https://github.com/rbty
 from __future__ import annotations
 
 
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     EVENT_HOMEASSISTANT_STOP,
@@ -17,6 +18,20 @@ from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import DOMAIN
 from .device import ONVIFDevice
+
+
+async def async_setup(hass: HomeAssistant, config) -> bool:
+    """Register the static path for the Lovelace card."""
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            url_path="/onvif_ptz/onvif-ptz-preset-card.js",
+            path=hass.config.path(
+                "custom_components/onvif_ptz/www/onvif-ptz-preset-card.js"
+            ),
+            cache_headers=False,
+        )
+    ])
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

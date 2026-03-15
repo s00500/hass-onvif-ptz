@@ -12,5 +12,6 @@
     "onvif-zeep-async==4.0.4",
     "WSDiscovery==2.1.2"
   ],
-  "version": "0.4.0"
+  "version": "0.4.0",
+  "dependencies": ["frontend", "http"]
 }
